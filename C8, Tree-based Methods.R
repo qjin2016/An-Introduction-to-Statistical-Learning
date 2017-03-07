@@ -142,11 +142,22 @@ yhat.boost <- predict(boost.boston, newdata = Boston[-train, ], n.trees = 5000)
 mean((yhat.boost - boston.test)^2)
 
 
+# modeling
+data(Carseats)
+attach(Carseats)
+High <- ifelse(Sales<=8, 0, 1)
 
+Carseats <- data.frame(Carseats, as.factor(High))
 
+gbm.carseats <- gbm(High~., data = Carseats, distribution='huberized',
+                     n.trees=5000, interaction.depth=4, cv.folds = 10)
+summary(gbm.carseats)
+gbm.carseats.iter <- gbm.perf(gbm.carseats, method='cv')
+print(gbm.carseats.iter)
+pred <- round(predict(gbm.carseats, Carseats, gbm.carseats.iter, type='response'))
+table(tru=High, pred=ifelse(pred<0, 0, 1))
 
-
-
+predict(gbm.carseats, Carseats, gbm.carseats.iter)
 
 
 
